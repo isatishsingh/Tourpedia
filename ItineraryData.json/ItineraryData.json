@@ -1,0 +1,63 @@
+ let itinerary = [
+    {
+      day: 1,
+      title: "Arrival in Bali",
+      subtitle: "Arrival at Ngurah Rai International Airport and welcoming tour",
+      image: templeBali,
+      activities: [
+        "10:00 AM - Visit the Kuta Beach and enjoy the iconic beauty",
+        "12:00 PM - Fresh lunch at a local restaurant",
+        "2:00 PM - Explore the Kuta Art Market and shop for souvenirs",
+        "4:00 PM - Visit Uluwatu Temple and take in the scenic park in Kuta",
+        "6:00 PM - Watch the sunset at the Kuta Beach",
+        "7:30 PM - Have dinner at a local restaurant"
+      ]
+    },
+    {
+      day: 2,
+      title: "Visiting Ubud",
+      subtitle: "Immerse yourself in the cultural heart of Bali, Rice Terraces",
+      image: templeBali,
+      activities: [
+        "8:00 AM - Breakfast at your hotel",
+        "9:00 AM - Visit the Sacred Monkey Forest and interact with monkeys",
+        "11:00 AM - Visit the Goa Gajah temple, a UNESCO World Heritage Site",
+        "1:00 PM - Have lunch at a local restaurant in Ubud",
+        "3:00 PM - Explore the Tegallalang Rice Terraces",
+        "4:00 PM - Visit the Tirta Empul temple and take a dip in the holy water",
+        "6:00 PM - Return to your hotel in Kuta",
+        "7:30 PM - Have dinner at a local restaurant"
+      ]
+    },
+    {
+      day: 3,
+      title: "Nusa Penida Tour",
+      subtitle: "Island hopping adventure to Nusa Penida",
+      image: nusaPenida,
+      activities: [
+        "6:00 AM - Pick up from your hotel in Kuta and transfer to the Sanur Beach",
+        "7:00 AM - Board the boat to Nusa Penida",
+        "8:00 AM - Visit the Kelingking Beach and take in the breathtaking views",
+        "11:00 AM - Visit the Broken Beach and Angel's Billabong",
+        "1:00 PM - Have lunch at a local restaurant in Nusa Penida",
+        "2:00 PM - Visit the Crystal Bay and enjoy the pristine white sand beach",
+        "4:00 PM - Return to Bali and transfer to your hotel in Kuta",
+        "7:00 PM - Have dinner at a local restaurant"
+      ]
+    },
+    {
+      day: 4,
+      title: "Tanah Lot and Departure",
+      subtitle: "Final day exploring temples and departure preparation",
+      image: tanahLot,
+      activities: [
+        "8:00 AM - Check out from your hotel and transfer to the Tanah Lot",
+        "9:00 AM - Visit the Tanah Lot temple and explore the stunning beach views",
+        "10:00 PM - Transfer back to your hotel for lunch and packing",
+        "12:00 PM - Depart from your hotel to Ngurah Rai International Airport",
+        "1:00 PM - Check-in for your departure flight",
+        "3:00 PM - Board your flight and say goodbye to Bali",
+        "5:00 PM - Arrive at your final destination, marking the end of your unforgettable Bali journey"
+      ]
+    }
+  ];
