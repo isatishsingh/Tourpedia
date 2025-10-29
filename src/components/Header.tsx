@@ -5,6 +5,7 @@ import { Plane, Home, Users, MessageCircle, Github, User } from "lucide-react";
 import { auth } from "../firebase-key-code/firebase-auth-2-O";
 import { onAuthStateChanged } from "firebase/auth";
 import { useState, useEffect } from "react";
+import logo from "@/assets/logo.jpg";
 
 const Header = () => {
   const [user, setUser] = useState<any>(null);
@@ -60,9 +61,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo and Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-travel-blue rounded-lg flex items-center justify-center">
-            <Plane className="w-5 h-5 text-white" />
-          </div>
+          <img src={logo} alt="logo" className="w-10 h-10 text-white" />
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-semibold">Travel Itinerary Generator</h1>
             <Badge variant="secondary" className="bg-travel-blue text-white border-0 text-xs px-2 py-1">
