@@ -121,3 +121,9 @@ All colors MUST be HSL.
       background: linear-gradient(to bottom, hsl(var(--coral)) 0%, hsl(var(--coral)) 100%);
     }
 }
+
+.book_btn{
+  border: 2px;
+  border-radius: 50px;
+  background-color: hsl(213.88deg 100% 59.02%);
+} 
