@@ -1,19 +1,29 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const OpenAI = require('openai');
-const fs = require('fs');
-const path = require('path');
+import express from 'express';
+import cors from 'cors';
+import OpenAI from 'openai';
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
+import { sequelize } from './config/database.js';
+import userRouter from './routes/user.js'
+import contactRouter from './routes/contact.js'
+import testimonialRouter from './routes/testimonial.js'
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ 
-    origin: ["http://localhost:8080", "http://localhost:5173"],
-    methods: ["GET", "POST"],
-    credentials: true,
-}));                         
+dotenv.config();
+
+app.use(cors({
+  origin: ["http://localhost:8080", "http://localhost:5173"],
+  methods: ["GET", "POST"],
+  credentials: true,
+}));
 app.use(express.json());
+
+app.use('/user', userRouter);
+app.use('/contact', contactRouter);
+app.use('/testimonial', testimonialRouter);
 
 // OpenAI client
 const openai = new OpenAI({
@@ -154,6 +164,7 @@ app.post('/api/itinerary', async (req, res) => {
 });
 
 app.listen(PORT, () => {
+  sequelize.sync();
   console.log(`Itinerary API server running on http://localhost:${PORT}`);
 });
 
