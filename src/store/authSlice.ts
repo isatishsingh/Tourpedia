@@ -6,9 +6,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // ------------------------
 export interface User {
   uid: string;
-  displayName: string | null;
+  firstName: string | null;
+  lastName: string | null;
   email: string | null;
-  photoURL: string | null;
+  photoURL?: string | null;
+  phoneNumber: string | null;
 }
 
 // ------------------------
@@ -16,13 +18,21 @@ export interface User {
 // ------------------------
 interface AuthState {
   user: User | null;
+  isAuthenticated: boolean;
 }
+
+
+// ------------------------
+// Load localStorage user if exists
+// ------------------------
+const storedUser = localStorage.getItem("user");
 
 // ------------------------
 // Initial state
 // ------------------------
 const initialState: AuthState = {
-  user: null,
+  user: storedUser ? JSON.parse(storedUser) : null,
+  isAuthenticated: !!storedUser,  // Automatically authenticated if user exists
 };
 
 // ------------------------
@@ -34,9 +44,11 @@ const authSlice = createSlice({
   reducers: {
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
+      state.isAuthenticated = true;
     },
     clearUser: (state) => {
-      state.user = null;
+    state.user = null; // clear stored user
+    state.isAuthenticated = false;  // mark logged out
     },
   },
 });

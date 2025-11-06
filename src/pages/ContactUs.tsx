@@ -24,20 +24,42 @@ const ContactUs = () => {
     message: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [credentialError, setCredentialError] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    setTimeout(() => {
-      toast({
-        title: "Message Sent Successfully! ✈️",
-        description: "Thanks for reaching out! We'll get back to you within 24 hours to help plan your next adventure.",
-      });
-      setFormData({ name: "", email: "", message: "" });
+    if(!formData.name || !formData.email || !formData.message){
+      alert("Enter the details properly");
+      setCredentialError(true);
       setIsLoading(false);
-    }, 2000);
+      return;
+    }
+
+    try{
+      const response = await fetch("http://localhost:3000/user/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      });
+
+      setTimeout(() => {
+        toast({
+          title: "Message Sent Successfully! ✈️",
+          description: "Thanks for reaching out! We'll get back to you within 24 hours to help plan your next adventure.",
+        });
+        setFormData({ name: "", email: "", message: "" });
+        setIsLoading(false);
+      }, 2000);
+    }catch(error){
+      console.log("Error =>",error);
+    }
   };
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -136,7 +158,7 @@ const ContactUs = () => {
                 <div>
                   <h3 className="font-bold text-xl text-slate-800 mb-2">Address</h3>
                   <p className="text-slate-600 text-lg">
-                    Facilisis commodo mattis neque nulla ultrices mattis sed. Ullamcorper tempus mattis ac tristique gravida ornare faucibus suspendisse.
+                    Pune, India
                   </p>
                 </div>
               </div>
@@ -147,7 +169,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-800 text-xl mb-2">Phone</h3>
-                  <p className="text-slate-600">+1 (333) 000-0000</p>
+                  <p className="text-slate-600">+91 999882323</p>
                 </div>
               </div>
 
@@ -157,7 +179,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-800 text-xl mb-2">Mail</h3>
-                  <p className="text-slate-600 text-base">lungoo@mail.com</p>
+                  <p className="text-slate-600 text-base">tourPedia@mail.com</p>
                 </div>
               </div>
             </div>

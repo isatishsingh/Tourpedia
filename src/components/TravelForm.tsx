@@ -10,37 +10,34 @@ import Header from "./Header";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
 import { fetchItinerary } from "@/store/itinerarySlice";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 const TravelForm = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
   const [travelDate, setTravelDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
   const today = new Date().toISOString().split("T")[0];
 
   // ✅ Authentication check
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-      if (!user) navigate("/login");
-    });
-    return () => unsubscribe();
-  }, [navigate]);
+    if (!user) navigate("/login");
+  }, [user, navigate]);
 
   // ✅ Validation function
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!fromLocation.trim()) newErrors.fromLocation = "Please enter your departure location.";
-    if (!toLocation.trim()) newErrors.toLocation = "Please enter your destination.";
+    if (!fromLocation.trim())
+      newErrors.fromLocation = "Please enter your departure location.";
+    if (!toLocation.trim())
+      newErrors.toLocation = "Please enter your destination.";
     if (!travelDate) newErrors.travelDate = "Please select your travel date.";
     if (!returnDate) newErrors.returnDate = "Please select your return date.";
     if (travelDate && returnDate && returnDate < travelDate)
@@ -56,19 +53,10 @@ const TravelForm = () => {
 
     if (!validateForm()) return;
 
-    if (!user) {
-      alert("Please log in to submit your travel details.");
-      navigate("/login");
-      return;
-    }
-
-    try {
-      dispatch(fetchItinerary({ fromLocation, toLocation, travelDate, returnDate }));
-      navigate("/itinerary");
-    } catch (error) {
-      console.error("Error generating itinerary:", error);
-      alert("Failed to generate itinerary. Please try again.");
-    }
+    dispatch(
+      fetchItinerary({ fromLocation, toLocation, travelDate, returnDate })
+    );
+    navigate("/itinerary");
   };
 
   // ✅ Logout
@@ -80,17 +68,6 @@ const TravelForm = () => {
       console.error("Error signing out:", error);
     }
   };
-
-  // ✅ Loading state
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-background py-16">
-        <div className="max-w-2xl mx-auto px-6 text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Loading...</h1>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -108,7 +85,10 @@ const TravelForm = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* From Field */}
           <div className="space-y-2">
-            <Label htmlFor="from" className="text-base font-medium text-foreground">
+            <Label
+              htmlFor="from"
+              className="text-base font-medium text-foreground"
+            >
               From:
             </Label>
             <Input
@@ -118,7 +98,8 @@ const TravelForm = () => {
               value={fromLocation}
               onChange={(e) => {
                 setFromLocation(e.target.value);
-                if (errors.fromLocation) setErrors((prev) => ({ ...prev, fromLocation: "" }));
+                if (errors.fromLocation)
+                  setErrors((prev) => ({ ...prev, fromLocation: "" }));
               }}
               className={`h-12 bg-white border ${
                 errors.fromLocation ? "border-red-500" : "border-border"
@@ -131,7 +112,10 @@ const TravelForm = () => {
 
           {/* To Field */}
           <div className="space-y-2">
-            <Label htmlFor="to" className="text-base font-medium text-foreground">
+            <Label
+              htmlFor="to"
+              className="text-base font-medium text-foreground"
+            >
               To:
             </Label>
             <Input
@@ -141,7 +125,8 @@ const TravelForm = () => {
               value={toLocation}
               onChange={(e) => {
                 setToLocation(e.target.value);
-                if (errors.toLocation) setErrors((prev) => ({ ...prev, toLocation: "" }));
+                if (errors.toLocation)
+                  setErrors((prev) => ({ ...prev, toLocation: "" }));
               }}
               className={`h-12 bg-white border ${
                 errors.toLocation ? "border-red-500" : "border-border"
@@ -154,7 +139,10 @@ const TravelForm = () => {
 
           {/* Travel Date */}
           <div className="space-y-2">
-            <Label htmlFor="travelDate" className="text-base font-medium text-foreground">
+            <Label
+              htmlFor="travelDate"
+              className="text-base font-medium text-foreground"
+            >
               Travel Date:
             </Label>
             <div className="relative">
@@ -183,7 +171,10 @@ const TravelForm = () => {
 
           {/* Return Date */}
           <div className="space-y-2">
-            <Label htmlFor="returnDate" className="text-base font-medium text-foreground">
+            <Label
+              htmlFor="returnDate"
+              className="text-base font-medium text-foreground"
+            >
               Return Date:
             </Label>
             <div className="relative">
