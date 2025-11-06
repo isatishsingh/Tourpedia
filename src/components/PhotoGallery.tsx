@@ -9,7 +9,7 @@ const PhotoGallery = () => {
       },
       {
         id: 2,
-        image: "https://images.unsplash.com/photo-1558005137-d9619a5c2509?w=400&h=400&fit=crop",
+        image: "https://www.traveltrendstoday.in/storage/posts/india-now-39th-among-119-countries-in-the-travel-j.jpg?w=400&h=500&fit=crop",
         username: "@princessaguayo",
         aspectRatio: "aspect-square"
       },
@@ -27,7 +27,7 @@ const PhotoGallery = () => {
       },
       {
         id: 5,
-        image: "https://images.unsplash.com/photo-1571071718633-6265aaf4e324?w=400&h=400&fit=crop",
+        image: "https://etimg.etb2bimg.com/photo/116504355.cms?w=400&h=400&fit=crop",
         username: "@azimovic",
         aspectRatio: "aspect-square"
       },
@@ -39,7 +39,7 @@ const PhotoGallery = () => {
       },
       {
         id: 7,
-        image: "https://images.unsplash.com/photo-1577949924003-76fb95d48e7c?w=400&h=400&fit=crop",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMJBthh2EwI3RG69fXEkl_kC3IOTZoZAG0Dg&s?w=400&h=400&fit=crop",
         username: "@rip.felix.p",
         aspectRatio: "aspect-square"
       },

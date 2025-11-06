@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, User, LogOut } from "lucide-react";
+import { Calendar, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase-key-code/firebase-auth-2-O";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -13,135 +13,95 @@ import { fetchItinerary } from "@/store/itinerarySlice";
 
 const TravelForm = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
   const [travelDate, setTravelDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
-  const [user, setUser] = useState<any>(null); 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
-  // Check authentication state
+  const today = new Date().toISOString().split("T")[0];
+
+  // ✅ Authentication check
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
-
-      // trmporary blocked
-      // If user is not authenticated, redirect to login
-      if (!user) {
-        navigate('/login');
-      }
+      if (!user) navigate("/login");
     });
-
     return () => unsubscribe();
   }, [navigate]);
 
-  //  form response
-  const submitForm = async (e: React.FormEvent) => {
-    const body = { fromLocation, toLocation, travelDate, returnDate };
-    const res = await fetch('http://localhost:3000/api/itinerary', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const json = await res.json();
-    console.log('itinerary', json);
-    // setItinerary(json.itinerary)  -> display in UI
+  // ✅ Validation function
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!fromLocation.trim()) newErrors.fromLocation = "Please enter your departure location.";
+    if (!toLocation.trim()) newErrors.toLocation = "Please enter your destination.";
+    if (!travelDate) newErrors.travelDate = "Please select your travel date.";
+    if (!returnDate) newErrors.returnDate = "Please select your return date.";
+    if (travelDate && returnDate && returnDate < travelDate)
+      newErrors.returnDate = "Return date cannot be before the travel date.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate('/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
-
+  // ✅ Form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // temporary blocked
-    // Double check if user is authenticated before submitting
+    if (!validateForm()) return;
+
     if (!user) {
       alert("Please log in to submit your travel details.");
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
     try {
-      console.log(fromLocation," ",toLocation," ",travelDate," ",returnDate," <= 75");
-      dispatch(
-        fetchItinerary({
-          fromLocation,
-          toLocation,
-          travelDate,
-          returnDate,
-        })
-      );
-      navigate('/itinerary');
+      dispatch(fetchItinerary({ fromLocation, toLocation, travelDate, returnDate }));
+      navigate("/itinerary");
     } catch (error) {
       console.error("Error generating itinerary:", error);
       alert("Failed to generate itinerary. Please try again.");
     }
   };
 
-  // Show loading state while checking authentication
+  // ✅ Logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/login");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  // ✅ Loading state
   if (loading) {
     return (
       <main className="min-h-screen bg-background py-16">
-        <div className="max-w-2xl mx-auto px-6">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-foreground mb-4">
-              Loading...
-            </h1>
-          </div>
+        <div className="max-w-2xl mx-auto px-6 text-center">
+          <h1 className="text-4xl font-bold text-foreground mb-4">Loading...</h1>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-background ">
-      {/*header*/}
+    <main className="min-h-screen bg-background">
       <Header />
       <div className="max-w-2xl mx-auto px-6">
-        {/* User Info and Logout */}
-        {/* {user && (
-          <div className="mb-8 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-travel-blue" />
-                <div>
-                  <p className="font-medium text-gray-800">
-                    Welcome, {user.displayName || user.email}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {user.email}
-                  </p>
-                </div>
-              </div>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 text-gray-600 hover:text-red-600"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </Button>
-            </div>
-          </div>
-        )} */}
-
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4">
             Travel Itinerary Generator
           </h1>
           <p className="text-gray-600">
-            Plan your perfect trip with our Itinerary generator
+            Plan your perfect trip with our itinerary generator
           </p>
         </div>
 
@@ -156,9 +116,17 @@ const TravelForm = () => {
               type="text"
               placeholder="Enter your boarding point"
               value={fromLocation}
-              onChange={(e) => setFromLocation(e.target.value)}
-              className="h-12 bg-white border-border text-foreground placeholder:text-muted-foreground"
+              onChange={(e) => {
+                setFromLocation(e.target.value);
+                if (errors.fromLocation) setErrors((prev) => ({ ...prev, fromLocation: "" }));
+              }}
+              className={`h-12 bg-white border ${
+                errors.fromLocation ? "border-red-500" : "border-border"
+              } text-foreground placeholder:text-muted-foreground`}
             />
+            {errors.fromLocation && (
+              <p className="text-red-500 text-sm mt-1">{errors.fromLocation}</p>
+            )}
           </div>
 
           {/* To Field */}
@@ -171,9 +139,17 @@ const TravelForm = () => {
               type="text"
               placeholder="Enter your destination"
               value={toLocation}
-              onChange={(e) => setToLocation(e.target.value)}
-              className="h-12 bg-white border-border text-foreground placeholder:text-muted-foreground"
+              onChange={(e) => {
+                setToLocation(e.target.value);
+                if (errors.toLocation) setErrors((prev) => ({ ...prev, toLocation: "" }));
+              }}
+              className={`h-12 bg-white border ${
+                errors.toLocation ? "border-red-500" : "border-border"
+              } text-foreground placeholder:text-muted-foreground`}
             />
+            {errors.toLocation && (
+              <p className="text-red-500 text-sm mt-1">{errors.toLocation}</p>
+            )}
           </div>
 
           {/* Travel Date */}
@@ -185,13 +161,24 @@ const TravelForm = () => {
               <Input
                 id="travelDate"
                 type="date"
-                placeholder="dd-mm-yyyy"
                 value={travelDate}
-                onChange={(e) => setTravelDate(e.target.value)}
-                className="h-12 bg-white border-border text-foreground pr-10"
+                onChange={(e) => {
+                  const selected = e.target.value;
+                  setTravelDate(selected);
+                  if (returnDate && selected > returnDate) setReturnDate("");
+                  if (errors.travelDate)
+                    setErrors((prev) => ({ ...prev, travelDate: "" }));
+                }}
+                className={`h-12 bg-white border ${
+                  errors.travelDate ? "border-red-500" : "border-border"
+                } text-foreground pr-10`}
+                min={today}
               />
               <Calendar className="absolute right-3 top-3 h-6 w-6 text-muted-foreground pointer-events-none" />
             </div>
+            {errors.travelDate && (
+              <p className="text-red-500 text-sm mt-1">{errors.travelDate}</p>
+            )}
           </div>
 
           {/* Return Date */}
@@ -203,13 +190,23 @@ const TravelForm = () => {
               <Input
                 id="returnDate"
                 type="date"
-                placeholder="dd-mm-yyyy"
                 value={returnDate}
-                onChange={(e) => setReturnDate(e.target.value)}
-                className="h-12 bg-white border-border text-foreground pr-10"
+                onChange={(e) => {
+                  setReturnDate(e.target.value);
+                  if (errors.returnDate)
+                    setErrors((prev) => ({ ...prev, returnDate: "" }));
+                }}
+                className={`h-12 bg-white border ${
+                  errors.returnDate ? "border-red-500" : "border-border"
+                } text-foreground pr-10`}
+                min={travelDate || today} // ✅ allows same day or after
+                disabled={!travelDate}
               />
               <Calendar className="absolute right-3 top-3 h-6 w-6 text-muted-foreground pointer-events-none" />
             </div>
+            {errors.returnDate && (
+              <p className="text-red-500 text-sm mt-1">{errors.returnDate}</p>
+            )}
           </div>
 
           {/* Submit Button */}

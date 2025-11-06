@@ -16,8 +16,8 @@ const BookingCard = () => {
         <div>
           <span className="text-sm text-muted-foreground">From</span>
           <div className="flex items-baseline space-x-1">
-            <span className="text-3xl font-bold text-foreground">$499</span>
-            <span className="text-sm text-muted-foreground">USD</span>
+            <span className="text-3xl font-bold text-foreground">Rs.499</span>
+            <span className="text-sm text-muted-foreground">INR</span>
           </div>
         </div>
 
@@ -41,7 +41,7 @@ const BookingCard = () => {
         </div>
 
         {/* Book Now Button */}
-        <Button className="w-full bg-coral hover:bg-coral-light text-coral-foreground font-semibold py-3">
+        <Button  className="book_btn" >
           Book Now
         </Button>
       </CardContent>
