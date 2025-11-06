@@ -4,9 +4,9 @@ import { models } from "../models/index.js";
 export const createTestimonial = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { review, rating } = req.body;
+        const { name, occupation, title, review, rating } = req.body;
         const testimonial = await models.Testimonial.create(
-            { userId, review, rating }
+            { userId, name, occupation, title, review, rating }
         )
         return res.status(201).json({ success: true, data: testimonial })
     } catch (error) {
@@ -22,7 +22,7 @@ export const getAllTestimonials = async (req, res) => {
             include: [
                 {
                     model: models.User,
-                    attributes: ["id", "firstname", "lastname", "email", "phone", "country", "city"]
+                    attributes: ["id", "name", "occupation", "title", "review", "rating"]
                 },
             ],
         });
@@ -53,8 +53,8 @@ export const updateTestimonial = async (req, res) => {
     try {
         const userId = req.user.id;
         const testimonialId = req.params.id;
-        const { review, rating } = req.body;
-        const testimonial = await models.Testimonial.update({ review, rating }, { where: { userId, id: testimonialId } });
+        const { name, occupation, title, review, rating } = req.body;
+        const testimonial = await models.Testimonial.update({name, occupation, title, review, rating}, { where: { userId, id: testimonialId } });
         return res.status(200).json({ success: true, message: 'Testimonial updated successfully' })
     } catch (error) {
         console.log(error);

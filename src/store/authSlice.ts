@@ -6,11 +6,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // ------------------------
 export interface User {
   uid: string;
-  firstName: string | null;
-  lastName: string | null;
+  firstname: string | null;
+  lastname: string | null;
   email: string | null;
   photoURL?: string | null;
-  phoneNumber: string | null;
+  phone: string | null;
 }
 
 // ------------------------

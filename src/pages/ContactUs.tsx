@@ -33,14 +33,13 @@ const ContactUs = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     const token = localStorage.getItem("token");
     if (!formData.name || !formData.email || !formData.message) {
       alert("Enter the details properly");
       setCredentialError(true);
-      setIsLoading(false);
       return;
     }
+    setIsLoading(true);
 
     try {
       const response = await fetch("http://localhost:3000/contact/create", {
@@ -59,7 +58,6 @@ const ContactUs = () => {
       const data = response.json();
       if (!data) {
         alert("there is some error");
-        setIsLoading(false);
       } else {
         setTimeout(() => {
           toast({
@@ -73,6 +71,8 @@ const ContactUs = () => {
       }
     } catch (error) {
       console.log("Error =>", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

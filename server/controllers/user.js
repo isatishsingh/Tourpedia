@@ -29,10 +29,18 @@ export const register = async (req, res) => {
       country,
       city,
     });
+    
+    // ✅ Generate token here
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
+
     // Remove password before sending response
     const { password: _, ...userData } = user.get({ plain: true });
 
-    return res.status(201).json({ success: true, token, data: user });
+    return res.status(201).json({ 
+      success: true, 
+      message: "User registered successfully",
+      token,
+      data: user });
   } catch (error) {
     console.log(error);
   }

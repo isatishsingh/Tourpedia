@@ -11,38 +11,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import userAvatar from "@/assets/Maddison.jpeg";
 import dummyImg from "@/assets/dummy.png";
-import { signOut } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
-import { auth } from "@/firebase-key-code/firebase-auth-2-O";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { clearUser } from "@/store/authSlice";
 import { useEffect } from "react";
+import { setUser } from "@/store/authSlice";
 
 const UserProfile = () => {
-  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
-  const { uid, firstName, lastName, email, photoURL, phoneNumber } = user ?? {
+  console.log(user)
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    console.log(storedUser, "39");
+    if (!user && storedUser) {
+      dispatch(setUser(JSON.parse(storedUser)));
+    } else if (!storedUser) {
+      navigate("/login");
+    }
+  }, [user, dispatch, navigate]);
+  const { uid, firstname, lastname, email, photoURL, phone } = user ?? {
     uid: "0",
     firstName: "John",
     lastName: "Doe",
     email: "johndio030@gmail.com",
     photoURL: dummyImg,
-    phoneNumber: 9998882323,
+    phone: 9998882323,
   };
-  
-  useEffect(() => {
-  if (!user) {
-    navigate("/login");
-  }
-}, [user, navigate]);
-  console.log(photoURL, " <=17");
-  // const [UserfirstName, ...rest] = (displayName ?? "").split(" ");
-  // const UserlastName = rest.join(" ") || "";
+
   const menuItems = [
     { icon: Home, label: "Home", active: false, to: "/" },
     {
@@ -70,16 +71,6 @@ const UserProfile = () => {
       localStorage.removeItem("user");
       dispatch(clearUser());
       navigate("/login");
-
-      // Clear Local Storage
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
-      // Clear Redux State
-      dispatch(clearUser());
-
-      // Redirect to Login
-      navigate("/login");
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -101,7 +92,7 @@ const UserProfile = () => {
               />
               <div>
                 <h3 className="font-semibold text-foreground text-sm">
-                  {firstName + " " + lastName}
+                  {firstname + " " + lastname}
                 </h3>
                 <p className="text-muted-foreground text-xs">{userData.role}</p>
                 <p className="text-muted-foreground text-xs">
@@ -176,7 +167,7 @@ const UserProfile = () => {
                     />
                     <div>
                       <h3 className="font-semibold text-foreground">
-                        {firstName + " " + lastName}
+                        {firstname + " " + lastname}
                       </h3>
                       <p className="text-muted-foreground text-sm">
                         {userData.role}
@@ -221,13 +212,13 @@ const UserProfile = () => {
                     <label className="text-muted-foreground text-sm">
                       First Name
                     </label>
-                    <p className="font-medium text-foreground">{firstName}</p>
+                    <p className="font-medium text-foreground">{firstname}</p>
                   </div>
                   <div>
                     <label className="text-muted-foreground text-sm">
                       Last Name
                     </label>
-                    <p className="font-medium text-foreground">{lastName}</p>
+                    <p className="font-medium text-foreground">{lastname}</p>
                   </div>
                   <div>
                     <label className="text-muted-foreground text-sm">
@@ -239,7 +230,7 @@ const UserProfile = () => {
                     <label className="text-muted-foreground text-sm">
                       Phone
                     </label>
-                    <p className="font-medium text-foreground">{phoneNumber}</p>
+                    <p className="font-medium text-foreground">{phone}</p>
                   </div>
                   <div>
                     <label className="text-muted-foreground text-sm">

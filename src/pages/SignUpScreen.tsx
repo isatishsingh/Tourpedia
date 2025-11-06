@@ -6,15 +6,21 @@ import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import { Facebook, Twitter, Chrome, ArrowLeft } from "lucide-react";
 import travelVanImage from "@/assets/travel-van.png";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/store/authSlice";
 
 const SignupScreen = () => {
+  const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [credentialError, setCredentialError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("Please enter valid credential");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(
+    "Please enter valid credential"
+  );
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -25,11 +31,12 @@ const SignupScreen = () => {
       setCredentialError(true);
       return;
     }
-    setCredentialError(false);
+    // setCredentialError(false);
     const userName = name.split(" ");
     const firstname = userName[0];
     const lastname = userName[1] || "";
 
+    setIsLoading(true);
     try {
       const response = await fetch("http://localhost:3000/user/register", {
         method: "POST",
@@ -41,28 +48,33 @@ const SignupScreen = () => {
           lastname,
           phone, // ✅ REQUIRED
           country: "INDIA", // optional default
-          city: "",
+          city: "Pune",
         }),
       });
 
       const data = await response.json();
       console.log("Signup Response:", data);
-      setEmail("");
-      setName("");
-      setPhone("");
-      setPassword("");
-      setConfirmPassword("");
-
+      
       if (data.error) {
         // alert(data.error);
         setCredentialError(true);
         setErrorMessage("This Email is already registered");
       } else {
+        if (data.token) localStorage.setItem("token", data.token);
+        dispatch(setUser(data.data)); 
+        localStorage.setItem("user", JSON.stringify(data.data));
         alert("Signup Successful!");
-        navigate('/');
+        setEmail("");
+        setName("");
+        setPhone("");
+        setPassword("");
+        setConfirmPassword("");
+        navigate("/");
       }
     } catch (error) {
       console.log("Error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -101,9 +113,7 @@ const SignupScreen = () => {
           {/* Signup Form */}
           {credentialError ? (
             <div>
-              <p className="text-gray-600 text-sm">
-                {errorMessage}
-              </p>
+              <p className="text-gray-600 text-sm">{errorMessage}</p>
             </div>
           ) : (
             <div></div>
@@ -190,9 +200,17 @@ const SignupScreen = () => {
             {/* Sign Up Button */}
             <Button
               onClick={handleSignup}
-              className="w-full h-12 bg-travel-green hover:bg-travel-green/90 text-white font-semibold rounded-2xl shadow-button transition-smooth"
+              disabled={isLoading}
+              className="w-full h-12 bg-travel-green hover:bg-travel-green/90 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-2xl shadow-button transition-smooth"
             >
-              SIGN UP
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Signing Up...
+                </div>
+              ) : (
+                "SIGN UP"
+              )}
             </Button>
 
             {/* Social Signup */}

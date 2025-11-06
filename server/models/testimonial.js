@@ -15,6 +15,15 @@ const Testimonial = sequelize.define("Testimonial", {
             key: 'id'
         }
     },
+    name:{
+        type: DataTypes.TEXT,
+    },
+    occupation: {
+        type: DataTypes.TEXT,
+    },
+    title: {
+        type: DataTypes.TEXT,
+    },
     review: {
         type: DataTypes.TEXT,
     },

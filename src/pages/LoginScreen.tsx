@@ -21,6 +21,7 @@ const LoginScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [loginError, setloginError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("Enter Credential");
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ const LoginScreen = () => {
       }
       return;
     }
-
+    setIsLoading(true);
     try {
       const response = await fetch("http://localhost:3000/user/login", {
         method: "POST",
@@ -49,9 +50,7 @@ const LoginScreen = () => {
       });
 
       const data = await response.json();
-      console.log("Signup Response:", data);
-      setPassword("");
-      setEmail("");
+      // console.log("Signup Response:", data);
 
       if (data.error) {
         setloginError(true);
@@ -65,11 +64,11 @@ const LoginScreen = () => {
           "user",
           JSON.stringify({
             uid: data.user.id,
-            firstName: data.user.firstname,
-            lastName: data.user.lastname,
+            firstname: data.user.firstname,
+            lastname: data.user.lastname,
             email: data.user.email,
             photoURL: "",
-            phoneNumber: data.user.phoneNumber,
+            phone: data.user.phoneNumber,
           })
         );
 
@@ -77,19 +76,24 @@ const LoginScreen = () => {
         dispatch(
           setUser({
             uid: data.user.id,
-            firstName: data.user.firstname,
-            lastName: data.user.lastname,
+            firstname: data.user.firstname,
+            lastname: data.user.lastname,
             email: data.user.email,
             photoURL: data.user.photoURL,
-            phoneNumber: "9988992121",
+            phone: "9988992121",
           })
         );
+
+        setPassword("");
+        setEmail("");
 
         // ✅ Redirect user
         navigate("/");
       }
     } catch (error) {
       console.log("Error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,15 +106,15 @@ const LoginScreen = () => {
         `Welcome ${result.user.displayName}! Redirecting to travel form...`
       );
       const user = result.user;
-      const [firstName, lastName = ""] = user.displayName.split(" ");
+      const [firstname, lastname = ""] = user.displayName.split(" ");
 
       const userData = {
         uid: user.uid,
-        firstName,
-        lastName,
+        firstname,
+        lastname,
         email: user.email,
         photoURL: user.photoURL,
-        phoneNumber: "9988992121",
+        phone: "9988992121",
       };
       const token = await user.getIdToken();
       // ✅ Save to LocalStorage
@@ -148,16 +152,16 @@ const LoginScreen = () => {
       const result = await signInWithPopup(auth, facebookProvider);
       const user = result.user;
 
-      const firstName = user.displayName.split(" ")[0];
-      const lastName = user.displayName.split(" ")[1];
+      const firstname = user.displayName.split(" ")[0];
+      const lastname = user.displayName.split(" ")[1];
       dispatch(
         setUser({
           uid: user.uid,
-          firstName: firstName,
-          lastName: lastName,
+          firstname,
+          lastname,
           email: user.email,
           photoURL: user.photoURL,
-          phoneNumber: "9988992121",
+          phone: "9988992121",
         })
       );
 
@@ -270,9 +274,17 @@ const LoginScreen = () => {
             {/* Sign In Button */}
             <Button
               onClick={handleLogin}
-              className="w-full h-12 bg-travel-blue hover:bg-travel-blue/90 text-white font-semibold rounded-2xl shadow-button transition-smooth"
+              disabled={isLoading}
+              className="w-full h-12 bg-travel-blue hover:bg-travel-blue/90 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-2xl shadow-button transition-smooth"
             >
-              SIGN IN
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Signing in...
+                </div>
+              ) : (
+                "SIGN IN"
+              )}
             </Button>
 
             {/* Social Login */}

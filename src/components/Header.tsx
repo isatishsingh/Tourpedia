@@ -2,62 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate } from "react-router-dom";
 import { Plane, Home, Users, MessageCircle, Github, User } from "lucide-react";
-import { auth } from "../firebase-key-code/firebase-auth-2-O";
-import { onAuthStateChanged } from "firebase/auth";
 import { useState, useEffect } from "react";
 import logo from "@/assets/logo.jpg";
 import { useSelector } from "react-redux";
 
 const Header = () => {
   const [user, setUser] = useState<any>(null);
-
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
-  const storeUser = useSelector((state) => state.auth.user);
-
-  // Check authentication state
-  useEffect(() => {
-    const unsubscribe = () => {
-      setUser(storeUser);
-    };
-
-    return () => unsubscribe();
-  }, []);
-
-  // Handle protected actions - redirect to login if not authenticated
-  const handleProtectedAction = (action: () => void) => {
-    // temporary stop
-    if (!storeUser) {
-      alert("Please log in to continue.");
-      navigate("/login");
-      return;
-    }
-    action();
-  };
-
-  const handleHomeClick = () => {
-    handleProtectedAction(() => {
-      navigate("/");
-    });
-  };
-
-  const handleAboutClick = () => {
-    handleProtectedAction(() => {
-      // Navigate to about page or scroll to features
-      navigate("/about");
-    });
-  };
-
-  const handleContactClick = () => {
-    handleProtectedAction(() => {
-      navigate("/contactus");
-    });
-  };
-
-  const handleUserClick = () => {
-    handleProtectedAction(() => {
-      navigate("/profile");
-    });
-  };
 
   return (
     <header className="bg-travel-header text-white px-6 py-4">
@@ -81,7 +33,7 @@ const Header = () => {
         {/* Navigation */}
         <nav className="flex items-center gap-6">
           <button
-            onClick={handleHomeClick}
+            onClick={() => navigate("/")}
             className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
           >
             <Home className="w-4 h-4" />
@@ -92,14 +44,15 @@ const Header = () => {
             className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
           ></Link>
           <button
-            onClick={handleAboutClick}
+            onClick={() => navigate("/about")}
             className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
           >
             <Users className="w-4 h-4" />
             About Us
           </button>
+
           <button
-            onClick={handleContactClick}
+            onClick={() => navigate("/contactus")}
             className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
@@ -107,7 +60,7 @@ const Header = () => {
           </button>
 
           <div className="flex items-center gap-3 ml-4">
-            {!storeUser ? (
+            {!token ? (
               <>
                 <Link to="/login">
                   <Button
@@ -130,8 +83,8 @@ const Header = () => {
               </>
             ) : (
               <>
-                <a href="#" className="text-white hover:text-gray-300">
-                  <User onClick={handleUserClick} className="w-5 h-5" />
+                <a className="text-white hover:text-gray-300">
+                  <User onClick={() => navigate('/profile')} className="w-5 h-5" />
                 </a>
               </>
             )}
