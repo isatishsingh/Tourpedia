@@ -1,29 +1,31 @@
-import express from 'express';
-import cors from 'cors';
-import OpenAI from 'openai';
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
-import { sequelize } from './config/database.js';
-import userRouter from './routes/user.js'
-import contactRouter from './routes/contact.js'
-import testimonialRouter from './routes/testimonial.js'
+import express from "express";
+import cors from "cors";
+import OpenAI from "openai";
+import fs from "fs";
+import path from "path";
+import dotenv from "dotenv";
+import { sequelize } from "./config/database.js";
+import userRouter from "./routes/user.js";
+import contactRouter from "./routes/contact.js";
+import testimonialRouter from "./routes/testimonial.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 dotenv.config();
 
-app.use(cors({
-  origin: ["http://localhost:8080", "http://localhost:5173"],
-  methods: ["GET", "POST"],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:8080", "http://localhost:5173"],
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-app.use('/user', userRouter);
-app.use('/contact', contactRouter);
-app.use('/testimonial', testimonialRouter);
+app.use("/user", userRouter);
+app.use("/contact", contactRouter);
+app.use("/testimonial", testimonialRouter);
 
 // OpenAI client
 const openai = new OpenAI({
@@ -40,12 +42,18 @@ async function fetchUnsplashImage(topic) {
       per_page: "1",
       orientation: "landscape",
     });
-    const resp = await fetch(`https://api.unsplash.com/search/photos?${params.toString()}`, {
-      headers: { Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}` },
-    });
+    const resp = await fetch(
+      `https://api.unsplash.com/search/photos?${params.toString()}`,
+      {
+        headers: { Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}` },
+      }
+    );
     if (!resp.ok) return null;
     const data = await resp.json();
-    const url = data?.results?.[0]?.urls?.regular || data?.results?.[0]?.urls?.full || null;
+    const url =
+      data?.results?.[0]?.urls?.regular ||
+      data?.results?.[0]?.urls?.full ||
+      null;
     return url;
   } catch (e) {
     console.warn("Unsplash fetch failed:", e.message);
@@ -54,11 +62,27 @@ async function fetchUnsplashImage(topic) {
 }
 
 // POST /api/itinerary
-app.post('/api/itinerary', async (req, res) => {
+app.post("/api/itinerary", async (req, res) => {
   const { travelingFrom, travelingTo, travelDate, returnDate } = req.body;
+  console.log(
+    travelingFrom,
+    " ",
+    travelingTo,
+    " ",
+    travelDate,
+    " ",
+    returnDate,
+    " <=67"
+  );
+  const currentDate = new Date().toISOString().split("T")[0];
+  const currentTime = new Date().toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 
   if (!travelingFrom || !travelingTo || !travelDate || !returnDate) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
@@ -68,13 +92,57 @@ app.post('/api/itinerary', async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are a travel planner AI. Generate structured itineraries in JSON format."
+          content:
+            "You are a travel planner AI. Generate structured itineraries in JSON format.",
         },
         {
           role: "user",
-          content: `Plan a day-by-day travel itinerary from ${travelingFrom} to ${travelingTo} starting on ${travelDate} and returning on ${returnDate}. 
-          Include for each day: date, activities (name, time, description, location). Return JSON only.`
-        }
+          content: `
+          You are a precise travel itinerary planner AI. You must strictly follow rules.
+
+          CurrentDate: ${currentDate}
+          CurrentTime: ${currentTime}
+          TravelDate: ${travelDate}
+          ReturnDate: ${returnDate}
+          From: ${travelingFrom}
+          To: ${travelingTo}
+
+          ### STRICT TIME RULE
+          If TravelDate == CurrentDate:
+          - The first day's schedule MUST start at or after CurrentTime (${currentTime}).
+          - DO NOT include any activities with a time earlier than ${currentTime}.
+          - If the time is past 18:00, begin only with evening suitable activities (check-in, dinner, night walk, rest).
+
+          ### TRAVEL MODE LOGIC
+          Determine the best travel mode and include it in output:
+          - If TravelDate == ReturnDate OR (TravelDate == CurrentDate AND CurrentTime > 12:00) → "Flight" (fastest).
+          - If the user has 1–5 days of trip → "Train" or "Intercity Bus".
+          - If more than 5 days → "Personal Car / Road Trip" (scenic).
+
+          ### REQUIRED OUTPUT FORMAT (JSON ONLY)
+          {
+            "travelRecommendation": {
+              "mode": "Flight | Train | Bus | Car",
+              "reason": "Short time / enough time / scenic preference etc."
+            },
+            "itinerary": [
+              {
+                "date": "YYYY-MM-DD",
+                "activities": [
+                  {
+                    "time": "HH:MM",
+                    "name": "Activity Name",
+                    "description": "Short description",
+                    "location": "Place"
+                  }
+                ]
+              }
+            ]
+          }
+
+          Return ONLY JSON. No explanation text.
+          `,
+        },
       ],
       response_format: { type: "json_object" }, // ensures proper JSON
     });
@@ -104,15 +172,20 @@ app.post('/api/itinerary', async (req, res) => {
     // Fallback: if AI returned no days, serve local sample itinerary
     if (!days.length) {
       try {
-        const samplePath = path.join(__dirname, '..', 'ItineraryData.json', 'ItineraryData.json');
-        const file = fs.readFileSync(samplePath, 'utf-8');
+        const samplePath = path.join(
+          __dirname,
+          "..",
+          "ItineraryData.json",
+          "ItineraryData.json"
+        );
+        const file = fs.readFileSync(samplePath, "utf-8");
         // Attempt to parse JSON; if this is not valid JSON, fall through to inline sample
         const sample = JSON.parse(file);
         if (Array.isArray(sample)) days = sample;
         else if (Array.isArray(sample?.itinerary)) days = sample.itinerary;
         else if (Array.isArray(sample?.days)) days = sample.days;
       } catch (e) {
-        console.warn('Sample itinerary load failed:', e.message);
+        console.warn("Sample itinerary load failed:", e.message);
       }
     }
 
@@ -123,8 +196,18 @@ app.post('/api/itinerary', async (req, res) => {
         {
           date: start,
           activities: [
-            { name: `Arrival in ${travelingTo || 'Destination'}`, time: '09:00', description: 'Begin your trip.', location: travelingTo || 'Destination' },
-            { name: 'City highlights', time: '14:00', description: 'Explore key attractions.', location: travelingTo || 'City Center' },
+            {
+              name: `Arrival in ${travelingTo || "Destination"}`,
+              time: "09:00",
+              description: "Begin your trip.",
+              location: travelingTo || "Destination",
+            },
+            {
+              name: "City highlights",
+              time: "14:00",
+              description: "Explore key attractions.",
+              location: travelingTo || "City Center",
+            },
           ],
         },
       ];
@@ -139,24 +222,27 @@ app.post('/api/itinerary', async (req, res) => {
         }
       }
       // fallback to any activity name
-      const named = day.activities.find(a => a?.name)?.name;
+      const named = day.activities.find((a) => a?.name)?.name;
       return named || "travel";
     };
-    const withImages = await Promise.all(days.map(async (day) => {
-      const topic = getPrimaryTopic(day);
-      const destinationHint = travelingTo || "";
-      // Prefer realistic, location-based images from Unsplash when configured
-      const unsplash = await fetchUnsplashImage(`${topic} ${destinationHint}`.trim());
-      const seed = encodeURIComponent(`${topic}-landmark-cityscape`);
-      const fallback = `https://picsum.photos/seed/${seed}/800/600`;
-      const image = unsplash || fallback;
-      return { ...day, image };
-    }));
+    const withImages = await Promise.all(
+      days.map(async (day) => {
+        const topic = getPrimaryTopic(day);
+        const destinationHint = travelingTo || "";
+        // Prefer realistic, location-based images from Unsplash when configured
+        const unsplash = await fetchUnsplashImage(
+          `${topic} ${destinationHint}`.trim()
+        );
+        const seed = encodeURIComponent(`${topic}-landmark-cityscape`);
+        const fallback = `https://picsum.photos/seed/${seed}/800/600`;
+        const image = unsplash || fallback;
+        return { ...day, image };
+      })
+    );
 
     const enriched = { ...ai, itinerary: withImages };
 
     return res.json({ success: true, itinerary: enriched });
-
   } catch (error) {
     console.error("OpenAI error:", error);
     res.status(500).json({ error: "Failed to generate itinerary" });
@@ -167,4 +253,3 @@ app.listen(PORT, () => {
   sequelize.sync();
   console.log(`Itinerary API server running on http://localhost:${PORT}`);
 });
-

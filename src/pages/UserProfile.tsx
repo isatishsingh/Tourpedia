@@ -44,6 +44,9 @@ const UserProfile = () => {
     phone: 9998882323,
   };
 
+  console.log("47=> ",photoURL)
+  console.log("48=> ",photoURL.trim())
+
   const menuItems = [
     { icon: Home, label: "Home", active: false, to: "/" },
     {
@@ -86,7 +89,7 @@ const UserProfile = () => {
           <div className="p-6 border-b border-border">
             <div className="flex items-center gap-3">
               <img
-                src={photoURL || dummyImg}
+                src={photoURL && photoURL.trim() !== "" ? photoURL : dummyImg}
                 alt="User Avatar"
                 className="w-12 h-12 rounded-full object-cover"
               />
