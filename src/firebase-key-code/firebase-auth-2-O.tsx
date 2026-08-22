@@ -6,13 +6,13 @@ import { getAnalytics } from "firebase/analytics";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBAn8PR70DOS3VUnVapDkXeD6qbdY9vDSM",
-  authDomain: "itinerary-generator-24-26.firebaseapp.com",
-  projectId: "itinerary-generator-24-26",
-  storageBucket: "itinerary-generator-24-26.firebasestorage.app",
-  messagingSenderId: "1093922440259",
-  appId: "1:1093922440259:web:2dbf1f2682d403036cc0f6",
-  measurementId: "G-9L92FHQEJ4"
+  apiKey: "",// ENTER_HERE_YOUR_FIREBASE_API_KEY,
+  authDomain: "", // YOUR_FIREBASE_DOMAIN_NAME
+  projectId: "", // YOUR_FIREBASE_PROJECT_ID
+  storageBucket: "", // YOUR_FIREBASE_STORAGE_BUCKET_ID
+  messagingSenderId: "", // YOUR_MESSAGE_SENDER_ID
+  appId: "", // YOUR_API_ID
+  measurementId: "" // YOUR_MEASURMENT_ID
 };
 
 // Initialize Firebase
